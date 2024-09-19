@@ -23,4 +23,4 @@ matrix:
       - 'pre'
       - 'blockquote'
   sources:
-  - '**/*.mdx|!docs/api-reference/**'
+  - '**/*.mdx|!docs/api-reference/**/*'
