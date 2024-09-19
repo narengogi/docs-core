@@ -12,7 +12,7 @@ matrix:
   - pyspelling.filters.context:
       delimiters:
       - open: '^openapi:'
-      - close: '$'
+        close: '$'
   - pyspelling.filters.markdown:
       markdown_extensions:
       - markdown.extensions.extra:
