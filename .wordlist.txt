@@ -2,10 +2,7 @@ Portkey
 openapi
 inviteId
 embeddings
-workspaceId
 workspaces
 configs
-userId
-exportId
 api
 moderations
