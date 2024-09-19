@@ -22,5 +22,6 @@ matrix:
       - 'code'
       - 'pre'
       - 'blockquote'
+      - 'codegroup'
   sources:
-  - '**/*.mdx|!api-reference/*|!api-reference/**/*|!docs/provider-endpoints/**/*|!docs/provider-endpoints/*|!docs/portkey-endpoints/**/*|!docs/portkey-endpoints/*'
+  - '**/*.mdx|!api-reference/*|!api-reference/**/*|!docs/provider-endpoints/**/*|!docs/provider-endpoints/*|!docs/portkey-endpoints/**/*|!docs/portkey-endpoints/*|!docs/api-reference/*'
