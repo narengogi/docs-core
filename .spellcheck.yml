@@ -9,10 +9,11 @@ matrix:
     output: wordlist.dic
     encoding: utf-8
   pipeline:
-  # - pyspelling.filters.context:
-  #     delimiters:
-  #     - open: '^openapi:'
-  #       close: '$'
+  - pyspelling.filters.context:
+      delimiters:
+      - open: '---\s*'
+        content: '[\s\S]*?'
+        close: '\s*---'
   - pyspelling.filters.markdown:
       markdown_extensions:
       - markdown.extensions.extra:
