@@ -21,6 +21,7 @@ matrix:
       - 'code'
       - 'pre'
       - 'blockquote'
+      - ':matches(openapi:)'
   sources:
   - '**/*.md'
   - '**/*.MD'
