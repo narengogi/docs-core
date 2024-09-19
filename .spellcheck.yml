@@ -23,4 +23,4 @@ matrix:
       - 'pre'
       - 'blockquote'
   sources:
-  - '**/*.mdx|!api-reference/*|!api-reference/**/*'
+  - '**/*.mdx|!api-reference/*|!api-reference/**/*|!docs/provider-endpoints/**/*|!docs/provider-endpoints/*|!docs/portkey-endpoints/**/*|!docs/portkey-endpoints/*'
