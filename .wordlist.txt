@@ -1,6 +1,4 @@
 Portkey
-openapi
-inviteId
 embeddings
 workspaces
 configs
