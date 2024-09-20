@@ -1,160 +1,381 @@
 ---
-title: "Jina AI"
+title: 'Jina AI'
+description: 'Integrate Jina AI embeddings and reranking into your applications with Portkey'
 ---
 
-Portkey provides a robust and secure gateway to facilitate the integration of various models into your applications, including [Jina AI embedding & reranker models](https://jina.ai/).
+**Portkey Provider Slug:** `jina`
 
-With Portkey, you can take advantage of features like fast AI gateway access, observability, and more, all while ensuring the secure management of your API keys through a [virtual key](/docs/product/ai-gateway/virtual-keys) system.
-<Note>
-Provider Slug. **`jina`**
-</Note>
-## Portkey SDK Integration with Jina AI Models
+## Overview
 
-Portkey provides a consistent API to interact with models from various providers. To integrate Jina AI with Portkey:
+Jina AI offers multimodal multilingual long-context embeddings for search, RAG, and agent applications. This document outlines the features, supported models, and integration methods available for Jina AI through the Portkey platform.
 
-### 1\. Install the Portkey SDK
+## Quick Links
 
-Add the Portkey SDK to your application to interact with Jina AI's API through Portkey's gateway.
+- [Jina AI Website](https://jina.ai/)
+- [Documentation](https://jina.ai/embeddings)
+- [Discord Community](https://discord.jina.ai/)
 
-<Tabs>
-  <Tab title="NodeJS">
+## Supported Features
 
-    ```
-    npm install --save portkey-ai
-    ```
-  </Tab>
-  <Tab title="Python">
+### Supported Models
 
-```
-pip install portkey-ai
-```
-  </Tab>
+| Type | Models |
+|------|--------|
+| Embed | [List of supported models](https://jina.ai/) |
+| Rerank | [List of supported models](https://jina.ai/) |
 
-</Tabs>
+### Unsupported Features
 
+- **Prompt Playground**: Prompt playground is not supported for Jina AI models.
+- **Specific Parameters**: The following parameters are not supported:
+  - task
+  - dimensions
+  - late_chunking
+  - embedding_type
 
+## Integration Guide
 
-### 2\. Initialize Portkey with the Virtual Key
+### Embed Calls
 
-To use JinaAI with Portkey, [get your API key from here](https://jina.ai/), then add it to Portkey to create the virtual key.
-<Tabs>
-  <Tab title="NodeJS SDK">
-    ```
-    import Portkey from 'portkey-ai'
+<CodeGroup>
 
-
-    const portkey = new Portkey({
-
-        apiKey: "PORTKEY_API_KEY", // defaults to process.env["PORTKEY_API_KEY"]
-
-        virtualKey: "JINA_AI_VIRTUAL_KEY" // Your Jina AI Virtual Key
-
-    })
-    ```
-  </Tab>
-  <Tab title="Python SDK">
-    ```
+```Python python
 from portkey_ai import Portkey
 
 portkey = Portkey(
-
-    api_key="PORTKEY_API_KEY",  # Replace with your Portkey API key
-
-    virtual_key="JINA_AI_VIRTUAL_KEY"   # Replace with your virtual key for Jina AI
-
+    api_key="$PORTKEY_API_KEY",
+    provider="jina",
+    authorisation="$PROVIDER_API_KEY"
 )
-```
-  </Tab>
 
-</Tabs>
-
-
-
-
-### **3\. Invoke Embeddings with** Jina AI
-
-Use the Portkey instance to send your embeddings requests to Jina AI. You can also override the virtual key directly in the API call if needed.
-<Tabs>
-  <Tab title="NodeJS SDK">
-    ```
-    const embeddings = await portkey.embeddings.create({
-
-        input: "embed this",
-
-        model: "jina-embeddings-v2-base-es",
-
-    });
-    ```
-  </Tab>
-  <Tab title="Python SDK">
-    ```
-embeddings = portkey.embeddings.create(
-
-    input='embed this',
-
-    model='jina-embeddings-v2-base-de'
-
+response = portkey.embeddings.create(
+    model="jina-embeddings-v2-base-es",
+    input=["Hello world", "Embed this text"]
 )
+
+print(response.data[0].embedding)
 ```
-  </Tab>
 
-</Tabs>
+```Node node
+import Portkey from 'portkey-ai';
 
-### Using Jina AI Reranker Models
+const portkey = new Portkey({
+  apiKey: "$PORTKEY_API_KEY",
+  provider: "jina",
+  authorisation: "$PROVIDER_API_KEY"
+});
 
-Portkey also supports the Reranker models by Jina AI through the REST API.
-<Tabs>
-  <Tab title="REST API">
-    ```
-    curl https://api.portkey.ai/v1/rerank \
+const response = await portkey.embeddings.create({
+  model: "jina-embeddings-v2-base-es",
+  input: ["Hello world", "Embed this text"]
+});
 
-      -H "Content-Type: application/json" \
+console.log(response.data[0].embedding);
+```
 
-      -H "Authorization: Bearer $JINA_AI_API_KEY" \
+```bash cURL
+curl https://api.portkey.ai/v1/embeddings \
+  -H "Content-Type: application/json" \
+  -H "x-portkey-api-key: $PORTKEY_API_KEY" \
+  -H "x-portkey-provider: jina" \
+  -H "Authorization: Bearer $PROVIDER_API_KEY" \
+  -d '{
+    "model": "jina-embeddings-v2-base-es",
+    "input": ["Hello world", "Embed this text"]
+  }'
+```
 
-      -H "x-portkey-provider: jina" \
+```Python OpenAI Python SDK
+from openai import OpenAI
+from portkey_ai import PORTKEY_GATEWAY_URL, createHeaders
 
-      -d '{
+client = OpenAI(
+    api_key="$PROVIDER_API_KEY",
+    base_url=PORTKEY_GATEWAY_URL,
+    default_headers=createHeaders(
+        provider="jina",
+        api_key="$PORTKEY_API_KEY"
+    )
+)
 
-      "model": "jina-reranker-v1-base-en",
+response = client.embeddings.create(
+    model="jina-embeddings-v2-base-es",
+    input=["Hello world", "Embed this text"]
+)
 
-      "query": "Organic skincare products for sensitive skin",
+print(response.data[0].embedding)
+```
 
-      "documents": [
+```Node OpenAI Node SDK
+import OpenAI from 'openai';
+import { PORTKEY_GATEWAY_URL, createHeaders } from 'portkey-ai';
 
-        "Eco-friendly kitchenware for modern homes",
+const client = new OpenAI({
+  apiKey: "$PROVIDER_API_KEY",
+  baseURL: PORTKEY_GATEWAY_URL,
+  defaultHeaders: createHeaders({
+    provider: "jina",
+    apiKey: "$PORTKEY_API_KEY"
+  })
+});
 
-        "Biodegradable cleaning supplies for eco-conscious consumers",
+const response = await client.embeddings.create({
+  model: "jina-embeddings-v2-base-es",
+  input: ["Hello world", "Embed this text"]
+});
 
-        "Organic cotton baby clothes for sensitive skin"
+console.log(response.data[0].embedding);
+```
 
-      ],
+</CodeGroup>
 
-      "top_n": 2
+### Rerank Calls
 
-    }'
+Rerank is supported through the Post Proxy call. Read more [here](/../link/to/post-proxy-dcoumentation).
 
-    ```
-  </Tab>
+<CodeGroup>
 
-</Tabs>
+```Python python
+from portkey_ai import Portkey
 
+portkey = Portkey(
+    api_key="$PORTKEY_API_KEY",
+    provider="jina",
+    authorisation="$PROVIDER_API_KEY"
+)
 
+response = portkey.post_proxy(
+    url="https://api.jina.ai/rerank",
+    json={
+        "model": "rerank-lite",
+        "query": "What is the capital of France?",
+        "documents": ["Paris is the capital of France.", "London is the capital of England."]
+    }
+)
 
+print(response.json())
+```
 
-## Supported Models
+```Node node
+import Portkey from 'portkey-ai';
 
-Portkey works with all the embedding & reranker models offered by Jina AI. You can browse the full list of Jina AI models [here](https://jina.ai/embeddings#apiform).
+const portkey = new Portkey({
+  apiKey: "$PORTKEY_API_KEY",
+  provider: "jina",
+  authorisation: "$PROVIDER_API_KEY"
+});
 
-## Next Steps
+const response = await portkey.postProxy({
+  url: "https://api.jina.ai/rerank",
+  data: {
+    model: "rerank-lite",
+    query: "What is the capital of France?",
+    documents: ["Paris is the capital of France.", "London is the capital of England."]
+  }
+});
 
-The complete list of features supported in the SDK are available on the link below.
-<Info>
-[SDK](/docs/api-reference/portkey-sdk-client)
-</Info>
-You'll find more information in the relevant sections:
+console.log(response.data);
+```
 
-1. [Add metadata to your requests](/docs/product/observability/metadata)
-2. [Add gateway configs to your J](/docs/product/ai-gateway/configs)ina AI[ requests](/docs/product/ai-gateway/configs)
-3. [Tracing Jina AI requests](/docs/product/observability/traces)
-4. [Setup a fallback from OpenAI Embeddings to Jina AI](/docs/product/ai-gateway/fallbacks)
+```bash cURL
+curl https://api.portkey.ai/proxy \
+  -X POST \
+  -H "Content-Type: application/json" \
+  -H "x-portkey-api-key: $PORTKEY_API_KEY" \
+  -H "x-portkey-provider: jina" \
+  -H "Authorization: Bearer $PROVIDER_API_KEY" \
+  -d '{
+    "url": "https://api.jina.ai/rerank",
+    "method": "POST",
+    "body": {
+      "model": "rerank-lite",
+      "query": "What is the capital of France?",
+      "documents": ["Paris is the capital of France.", "London is the capital of England."]
+    }
+  }'
+```
+
+```Python OpenAI Python SDK
+import requests
+from openai import OpenAI
+from portkey_ai import PORTKEY_GATEWAY_URL, createHeaders
+
+client = OpenAI(
+    api_key="$PROVIDER_API_KEY",
+    base_url=PORTKEY_GATEWAY_URL,
+    default_headers=createHeaders(
+        provider="jina",
+        api_key="$PORTKEY_API_KEY"
+    )
+)
+
+response = requests.post(
+    f"{PORTKEY_GATEWAY_URL}/proxy",
+    json={
+        "url": "https://api.jina.ai/rerank",
+        "method": "POST",
+        "body": {
+            "model": "rerank-lite",
+            "query": "What is the capital of France?",
+            "documents": ["Paris is the capital of France.", "London is the capital of England."]
+        }
+    },
+    headers=client.default_headers
+)
+
+print(response.json())
+```
+
+```Node OpenAI Node SDK
+import OpenAI from 'openai';
+import { PORTKEY_GATEWAY_URL, createHeaders } from 'portkey-ai';
+import axios from 'axios';
+
+const client = new OpenAI({
+  apiKey: "$PROVIDER_API_KEY",
+  baseURL: PORTKEY_GATEWAY_URL,
+  defaultHeaders: createHeaders({
+    provider: "jina",
+    apiKey: "$PORTKEY_API_KEY"
+  })
+});
+
+const response = await axios.post(
+  `${PORTKEY_GATEWAY_URL}/proxy`,
+  {
+    url: "https://api.jina.ai/rerank",
+    method: "POST",
+    body: {
+      model: "rerank-lite",
+      query: "What is the capital of France?",
+      documents: ["Paris is the capital of France.", "London is the capital of England."]
+    }
+  },
+  { headers: client.defaultHeaders }
+);
+
+console.log(response.data);
+```
+
+</CodeGroup>
+
+### Integration via Virtual Key
+
+1. **Generate a Virtual Key**
+   Get your API key from Jina AI and add it to Portkey to create a virtual key.
+
+   You can get your Jina AI API key from the Jina AI website [here](https://jina.ai/).
+
+   [Insert screenshot of virtual key generation process here]
+
+2. **Using the Virtual Key**
+
+<CodeGroup>
+
+```Python python
+from portkey_ai import Portkey
+
+portkey = Portkey(
+    api_key="$PORTKEY_API_KEY",
+    virtual_key="$VIRTUAL_KEY"
+)
+
+response = portkey.embeddings.create(
+    model="jina-embeddings-v2-base-es",
+    input=["Hello world", "Embed this text"]
+)
+
+print(response.data[0].embedding)
+```
+
+```Node node
+import Portkey from 'portkey-ai';
+
+const portkey = new Portkey({
+  apiKey: "$PORTKEY_API_KEY",
+  virtualKey: "$VIRTUAL_KEY"
+});
+
+const response = await portkey.embeddings.create({
+  model: "jina-embeddings-v2-base-es",
+  input: ["Hello world", "Embed this text"]
+});
+
+console.log(response.data[0].embedding);
+```
+
+```bash cURL
+curl https://api.portkey.ai/v1/embeddings \
+  -H "Content-Type: application/json" \
+  -H "x-portkey-api-key: $PORTKEY_API_KEY" \
+  -H "x-portkey-virtual-key: $VIRTUAL_KEY" \
+  -d '{
+    "model": "jina-embeddings-v2-base-es",
+    "input": ["Hello world", "Embed this text"]
+  }'
+```
+
+```Python OpenAI Python SDK
+from openai import OpenAI
+from portkey_ai import PORTKEY_GATEWAY_URL, createHeaders
+
+client = OpenAI(
+    api_key="$PROVIDER_API_KEY",
+    base_url=PORTKEY_GATEWAY_URL,
+    default_headers=createHeaders(
+        api_key="$PORTKEY_API_KEY",
+        virtual_key="$VIRTUAL_KEY"
+    )
+)
+
+response = client.embeddings.create(
+    model="jina-embeddings-v2-base-es",
+    input=["Hello world", "Embed this text"]
+)
+
+print(response.data[0].embedding)
+```
+
+```Node OpenAI Node SDK
+import OpenAI from 'openai';
+import { PORTKEY_GATEWAY_URL, createHeaders } from 'portkey-ai';
+
+const client = new OpenAI({
+  apiKey: "$PROVIDER_API_KEY",
+  baseURL: PORTKEY_GATEWAY_URL,
+  defaultHeaders: createHeaders({
+    apiKey: "$PORTKEY_API_KEY",
+    virtualKey: "$VIRTUAL_KEY"
+  })
+});
+
+const response = await client.embeddings.create({
+  model: "jina-embeddings-v2-base-es",
+  input: ["Hello world", "Embed this text"]
+});
+
+console.log(response.data[0].embedding);
+```
+
+</CodeGroup>
+
+### Prompt Playground
+
+Coming soon...
+
+## Explore Advanced Portkey Features
+
+<CardGroup cols={2}>
+  <Card title="Configure Routing" href="/docs/product/ai-gateway/routing">
+    <img src="/api/placeholder/400/320" alt="Configure Routing" />
+  </Card>
+  <Card title="Add Metadata to Requests" href="/docs/product/observability/metadata">
+    <img src="/api/placeholder/400/320" alt="Add Metadata to Requests" />
+  </Card>
+  <Card title="A/B Test Different Models" href="/docs/product/ai-gateway/load-balance">
+    <img src="/api/placeholder/400/320" alt="A/B Test Different Models" />
+  </Card>
+  <Card title="Gain Insights to Requests" href="/docs/product/observability/traces">
+    <img src="/api/placeholder/400/320" alt="Gain Insights to Requests" />
+  </Card>
+</CardGroup>

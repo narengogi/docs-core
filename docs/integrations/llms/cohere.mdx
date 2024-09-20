@@ -1,217 +1,401 @@
----
-title: "Cohere"
----
+# Cohere
 
-Portkey provides a robust and secure gateway to facilitate the integration of various Large Language Models (LLMs) into your applications, including Cohere's generation, embedding, and other endpoints.
+**Portkey Provider Slug:** `cohere`
 
-With Portkey, you can take advantage of features like fast AI gateway access, observability, prompt management, and more, all while ensuring the secure management of your LLM API keys through a [virtual key](/docs/product/ai-gateway/virtual-keys) system.
+## Overview
 
-<Note>
-Provider Slug. **`cohere`**
-</Note>
-## Portkey SDK Integration with Cohere
+Cohere allows developers and enterprises to build LLM-powered applications. This document outlines the features, supported models, and integration methods available for Cohere through the Portkey platform.
 
-Portkey provides a consistent API to interact with models from Cohere. To integrate Cohere with Portkey:
+## Quick Links
 
-### 1\. Install the Portkey SDK
+- [Cohere Website](https://cohere.com/)
+- [Documentation](https://docs.cohere.com/docs/the-cohere-platform)
+- [Discord Community](https://discord.com/invite/co-mmunity)
 
-Add the Portkey SDK to your application to interact with Cohere's models through Portkey's gateway.
-<Tabs>
-    <Tab title="NodeJS">
-        ```
-        npm install --save portkey-ai
-        ```
-    </Tab>
-    <Tab title="Python">
-        ```
-        pip install portkey-ai
-        ```
-    </Tab>
-  <Tab title="REST API" />
+## Supported Features
 
-  </Tabs>
+### Supported Models
 
+| Type | Models |
+|------|--------|
+| Chat Completions and Generate | command-r-plus-* family, command-r-* family, command, command-light, command-nightly, command-light-nightly, c4ai-aya-23-35b, c4ai-aya-23-8b |
+| Embed | embed-* family |
+| Rerank | rerank-* family |
+| Rate | Supported |
+| Summarise | Supported |
+| Classify | Supported |
 
+[More models](https://docs.cohere.com/docs/models)
 
+### Unsupported Features
 
-### 2\. Initialize Portkey with the Virtual Key
+- Prompt playground is not supported for Cohere models
+- Unsupported parameters: response_format, seed, prompt_truncation, preambles, documents, conversation_id, connectors, search_queries_only, citation_quality, max_input_tokens, safety_mode
 
-To use Cohere with Portkey, [get your API key from here](https://dashboard.cohere.com/api-keys), then add it to Portkey to create the virtual key.
+### Cohere-Specific Features
 
-<Tabs>
-    <Tab title="NodeJS SDK">
-        ```
-        import Portkey from 'portkey-ai'
+Rerank, Rate, Summarise, and Classify are supported through the Post Proxy call. Read more [here](/../link/to/post-proxy-dcoumentation).
 
+## Integration Guide
 
-        const portkey = new Portkey({
+### Chat Completions Call
 
-            apiKey: "PORTKEY_API_KEY", // defaults to process.env["PORTKEY_API_KEY"]
+<CodeGroup>
 
-            virtualKey: "VIRTUAL_KEY" // Your Cohere Virtual Key
+```Python python
+from portkey_ai import Portkey
 
-        })
-        ```
-    </Tab>
-    <Tab title="Python SDK">
-        ```
-        from portkey_ai import Portkey
+portkey = Portkey(
+    api_key="$PORTKEY_API_KEY",
+    provider="cohere",
+    authorisation="$COHERE_API_KEY"
+)
 
-        portkey = Portkey(
-
-            api_key="PORTKEY_API_KEY",  # Replace with your Portkey API key
-
-            virtual_key="VIRTUAL_KEY"   # Replace with your virtual key for Cohere
-
-        )
-        ```
-    </Tab>
-
-  </Tabs>
-
-
-
-
-
-### **3\. Invoke Chat Completions with Cohere**
-
-Use the Portkey instance to send requests to Cohere's models. You can also override the virtual key directly in the API call if needed.
-
-<Tabs>
-    <Tab title="NodeJS SDK">
-        ```
-        const chatCompletion = await portkey.chat.completions.create({
-
-            messages: [{ role: 'user', content: 'Say this is a test' }],
-
-            model: 'command',
-
-        });
-
-        console.log(chatCompletion.choices);
-        ```
-    </Tab>
-    <Tab title="Python SDK">
-        ```
-        chat_completion = portkey.chat.completions.create(
-
-            messages= [{ "role": 'user', "content": 'Say this is a test' }],
-
-            model= 'command'
-
-        )
-        ```
-    </Tab>
-
-  </Tabs>
-
-
-
-
-
-## Managing Cohere Prompts
-
-You can manage all prompts to Cohere in the [Prompt Library](/docs/product/prompt-library). All the current models of Cohere are supported and you can easily start testing different prompts.
-
-Once you're ready with your prompt, you can use the `portkey.prompts.completions.create` interface to use the prompt in your application.
-
-## Other Cohere Endpoints
-
-### Embeddings
-
-Embedding endpoints are natively supported within Portkey like this:
-
-
+response = portkey.chat.completions.create(
+    model="command-r-plus",
+    messages=[
+        {"role": "system", "content": "You are a helpful assistant."},
+        {"role": "user", "content": "Tell me a joke about programming."}
+    ]
+)
 ```
-const embedding = await portkey.embeddings.create({
 
-    input: 'Name the tallest buildings in Hawaii'
+```Node node
+import Portkey from 'portkey-ai';
 
+const portkey = new Portkey({
+  apiKey: "$PORTKEY_API_KEY",
+  provider: "cohere",
+  authorisation: "$COHERE_API_KEY"
 });
 
-console.log(embedding);
+const response = await portkey.chat.completions.create({
+  model: "command-r-plus",
+  messages: [
+    {role: "system", content: "You are a helpful assistant."},
+    {role: "user", content: "Tell me a joke about programming."}
+  ]
+});
 ```
 
-### Re-ranking
+```bash cURL
+curl https://api.portkey.ai/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "x-portkey-api-key: $PORTKEY_API_KEY" \
+  -H "x-portkey-provider: cohere" \
+  -H "Authorization: Bearer $COHERE_API_KEY" \
+  -d '{
+    "model": "command-r-plus",
+    "messages": [
+      {"role": "system", "content": "You are a helpful assistant."},
+      {"role": "user", "content": "Tell me a joke about programming."}
+    ]
+  }'
+```
 
-You can use cohere reranking the `portkey.post` method with the body expected by [Cohere's reranking API](https://docs.cohere.com/reference/rerank-1).
+```Python OpenAI Python SDK
+from openai import OpenAI
+from portkey_ai import PORTKEY_GATEWAY_URL, createHeaders
 
-<Tabs>
-    <Tab title="NodeJS SDK">
-        ```
-        const response = await portkey.post(
+client = OpenAI(
+    api_key="$COHERE_API_KEY",
+    base_url=PORTKEY_GATEWAY_URL,
+    default_headers=createHeaders(
+        provider="cohere",
+        api_key="$PORTKEY_API_KEY"
+    )
+)
 
-        "/rerank",
+response = client.chat.completions.create(
+    model="command-r-plus",
+    messages=[
+        {"role": "system", "content": "You are a helpful assistant."},
+        {"role": "user", "content": "Tell me a joke about programming."}
+    ]
+)
+```
 
-        {
+```Node OpenAI Node SDK
+import OpenAI from 'openai';
+import { PORTKEY_GATEWAY_URL, createHeaders } from 'portkey-ai';
 
-          "return_documents": false,
+const openai = new OpenAI({
+  apiKey: "$COHERE_API_KEY",
+  baseURL: PORTKEY_GATEWAY_URL,
+  defaultHeaders: createHeaders({
+    provider: "cohere",
+    apiKey: "$PORTKEY_API_KEY"
+  })
+});
 
-          "max_chunks_per_doc": 10,
+const response = await openai.chat.completions.create({
+  model: "command-r-plus",
+  messages: [
+    {role: "system", content: "You are a helpful assistant."},
+    {role: "user", content: "Tell me a joke about programming."}
+  ]
+});
+```
 
-          "model": "rerank-english-v2.0",
+</CodeGroup>
 
-          "query": "What is the capital of the United States?",
+### Integration via Virtual Key
 
-          "documents": [
+1. **Generate a Virtual Key**
+   Get your API key from Cohere and add it to Portkey to create a virtual key.
 
-            "Carson City is the capital city of the American state of Nevada.",
+   You can get your Cohere API key from the Cohere website [here](https://dashboard.cohere.com/api-keys).
 
-            "The Commonwealth of the Northern Mariana Islands is a group of islands in the Pacific Ocean. Its capital is Saipan.",
+   [Insert screenshot of virtual key generation process here]
 
-            "Washington, D.C. (also known as simply Washington or D.C., and officially as the District of Columbia) is the capital of the United States. It is a federal district.",
+2. **Using the Virtual Key**
 
-            "Capital punishment (the death penalty) has existed in the United States since beforethe United States was a country. As of 2017, capital punishment is legal in 30 of the 50 states."
+<CodeGroup>
 
-          ]
+```Python python
+from portkey_ai import Portkey
 
-        })
-        ```
-    </Tab>
-    <Tab title="Python SDK">
-        ```
-        response = portkey.post(
+portkey = Portkey(
+    api_key="$PORTKEY_API_KEY",
+    virtual_key="$VIRTUAL_KEY"
+)
 
-                "/rerank",
+response = portkey.chat.completions.create(
+    model="command-r-plus",
+    messages=[
+        {"role": "system", "content": "You are a helpful assistant."},
+        {"role": "user", "content": "Tell me a joke about programming."}
+    ]
+)
+```
 
-                return_documents=False,
+```Node node
+import Portkey from 'portkey-ai';
 
-                max_chunks_per_doc=10,
+const portkey = new Portkey({
+  apiKey: "$PORTKEY_API_KEY",
+  virtualKey: "$VIRTUAL_KEY"
+});
 
-                model="rerank-english-v2.0",
+const response = await portkey.chat.completions.create({
+  model: "command-r-plus",
+  messages: [
+    {role: "system", content: "You are a helpful assistant."},
+    {role: "user", content: "Tell me a joke about programming."}
+  ]
+});
+```
 
-                query="What is the capital of the United States?",
+```bash cURL
+curl https://api.portkey.ai/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "x-portkey-api-key: $PORTKEY_API_KEY" \
+  -H "x-portkey-virtual-key: $VIRTUAL_KEY" \
+  -d '{
+    "model": "command-r-plus",
+    "messages": [
+      {"role": "system", "content": "You are a helpful assistant."},
+      {"role": "user", "content": "Tell me a joke about programming."}
+    ]
+  }'
+```
 
-                documents=[
+```Python OpenAI Python SDK
+from openai import OpenAI
+from portkey_ai import PORTKEY_GATEWAY_URL, createHeaders
 
-                    "Carson City is the capital city of the American state of Nevada.",
+client = OpenAI(
+    api_key="",
+    base_url=PORTKEY_GATEWAY_URL,
+    default_headers=createHeaders(
+        api_key="$PORTKEY_API_KEY",
+        virtual_key="$VIRTUAL_KEY"
+    )
+)
 
-                    "The Commonwealth of the Northern Mariana Islands is a group of islands in the Pacific Ocean. Its capital is Saipan.",
+response = client.chat.completions.create(
+    model="command-r-plus",
+    messages=[
+        {"role": "system", "content": "You are a helpful assistant."},
+        {"role": "user", content": "Tell me a joke about programming."}
+    ]
+)
+```
 
-                    "Washington, D.C. (also known as simply Washington or D.C., and officially as the District of Columbia) is the capital of the United States. It is a federal district.",
+```Node OpenAI Node SDK
+import OpenAI from 'openai';
+import { PORTKEY_GATEWAY_URL, createHeaders } from 'portkey-ai';
 
-                    "Capital punishment (the death penalty) has existed in the United States since beforethe United States was a country. As of 2017, capital punishment is legal in 30 of the 50 states."
+const openai = new OpenAI({
+  apiKey: "",
+  baseURL: PORTKEY_GATEWAY_URL,
+  defaultHeaders: createHeaders({
+    apiKey: "$PORTKEY_API_KEY",
+    virtualKey: "$VIRTUAL_KEY"
+  })
+});
 
-                ]
+const response = await openai.chat.completions.create({
+  model: "command-r-plus",
+  messages: [
+    {role: "system", content: "You are a helpful assistant."},
+    {role: "user", content: "Tell me a joke about programming."}
+  ]
+});
+```
 
-            )
-        ```
-    </Tab>
+</CodeGroup>
 
-  </Tabs>
+### Special Example: Using Cohere Rerank with Post Proxy
 
+<CodeGroup>
 
+```Python python
+from portkey_ai import Portkey
 
+portkey = Portkey(
+    api_key="$PORTKEY_API_KEY",
+    provider="cohere",
+    authorisation="$COHERE_API_KEY"
+)
 
-## Next Steps
+response = portkey.post_proxy(
+    endpoint="https://api.cohere.ai/v1/rerank",
+    json={
+        "model": "rerank-english-v2.0",
+        "query": "What is the capital of France?",
+        "documents": [
+            "The capital of France is Paris.",
+            "London is the capital of the United Kingdom.",
+            "Berlin is the capital of Germany."
+        ],
+        "top_n": 2
+    }
+)
+```
 
-The complete list of features supported in the SDK are available on the link below.
-<Info>
-[SDK](/docs/api-reference/portkey-sdk-client)
-</Info>
-You'll find more information in the relevant sections:
+```Node node
+import Portkey from 'portkey-ai';
 
-1. [Add metadata to your requests](/docs/product/observability/metadata)
-2. [Add gateway configs to your Cohere requests](/docs/product/ai-gateway/configs)
-3. [Tracing Cohere requests](/docs/product/observability/traces)
-4. [Setup a fallback from OpenAI to Cohere APIs](/docs/product/ai-gateway/fallbacks)
+const portkey = new Portkey({
+  apiKey: "$PORTKEY_API_KEY",
+  provider: "cohere",
+  authorisation: "$COHERE_API_KEY"
+});
+
+const response = await portkey.postProxy({
+  endpoint: "https://api.cohere.ai/v1/rerank",
+  json: {
+    model: "rerank-english-v2.0",
+    query: "What is the capital of France?",
+    documents: [
+      "The capital of France is Paris.",
+      "London is the capital of the United Kingdom.",
+      "Berlin is the capital of Germany."
+    ],
+    top_n: 2
+  }
+});
+```
+
+```bash cURL
+curl https://api.portkey.ai/proxy \
+  -X POST \
+  -H "Content-Type: application/json" \
+  -H "x-portkey-api-key: $PORTKEY_API_KEY" \
+  -H "x-portkey-provider: cohere" \
+  -H "Authorization: Bearer $COHERE_API_KEY" \
+  -d '{
+    "endpoint": "https://api.cohere.ai/v1/rerank",
+    "json": {
+      "model": "rerank-english-v2.0",
+      "query": "What is the capital of France?",
+      "documents": [
+        "The capital of France is Paris.",
+        "London is the capital of the United Kingdom.",
+        "Berlin is the capital of Germany."
+      ],
+      "top_n": 2
+    }
+  }'
+```
+
+```Python OpenAI Python SDK
+from openai import OpenAI
+from portkey_ai import PORTKEY_GATEWAY_URL, createHeaders
+
+client = OpenAI(
+    api_key="$COHERE_API_KEY",
+    base_url=PORTKEY_GATEWAY_URL,
+    default_headers=createHeaders(
+        provider="cohere",
+        api_key="$PORTKEY_API_KEY"
+    )
+)
+
+response = client.post(
+    "proxy",
+    json={
+        "endpoint": "https://api.cohere.ai/v1/rerank",
+        "json": {
+            "model": "rerank-english-v2.0",
+            "query": "What is the capital of France?",
+            "documents": [
+                "The capital of France is Paris.",
+                "London is the capital of the United Kingdom.",
+                "Berlin is the capital of Germany."
+            ],
+            "top_n": 2
+        }
+    }
+)
+```
+
+```Node OpenAI Node SDK
+import OpenAI from 'openai';
+import { PORTKEY_GATEWAY_URL, createHeaders } from 'portkey-ai';
+
+const openai = new OpenAI({
+  apiKey: "$COHERE_API_KEY",
+  baseURL: PORTKEY_GATEWAY_URL,
+  defaultHeaders: createHeaders({
+    provider: "cohere",
+    apiKey: "$PORTKEY_API_KEY"
+  })
+});
+
+const response = await openai.post('proxy', {
+  json: {
+    endpoint: "https://api.cohere.ai/v1/rerank",
+    json: {
+      model: "rerank-english-v2.0",
+      query: "What is the capital of France?",
+      documents: [
+        "The capital of France is Paris.",
+        "London is the capital of the United Kingdom.",
+        "Berlin is the capital of Germany."
+      ],
+      top_n: 2
+    }
+  }
+});
+```
+
+</CodeGroup>
+
+## Explore Advanced Portkey Features
+
+<CardGroup cols={2}>
+  <Card title="Configure Routing" href="/docs/product/ai-gateway/routing">
+    <img src="/api/placeholder/400/320" alt="Configure Routing" />
+  </Card>
+  <Card title="Add Metadata to Requests" href="/docs/product/observability/metadata">
+    <img src="/api/placeholder/400/320" alt="Add Metadata to Requests" />
+  </Card>
+  <Card title="A/B Test Different Models" href="/docs/product/ai-gateway/load-balance">
+    <img src="/api/placeholder/400/320" alt="A/B Test Different Models" />
+  </Card>
+  <Card title="Gain Insights to Requests" href="/docs/product/observability/traces">
+    <img src="/api/placeholder/400/320" alt="Gain Insights to Requests" />
+  </Card>
+</CardGroup>

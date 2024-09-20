@@ -1,122 +1,258 @@
 ---
-title: "Moonshot"
+title: 'Moonshot'
+description: 'Integrate Moonshot LLMs into your applications with Portkey'
 ---
 
-Portkey provides a robust and secure gateway to facilitate the integration of various Large Language Models (LLMs) into your applications, including [Moonshot. ](https://moonshot.cn)
+**Portkey Provider Slug:** `moonshot`
 
-With Portkey, you can take advantage of features like fast AI gateway access, observability, prompt management, and more, all while ensuring the secure management of your LLM API keys through a [virtual key](/docs/product/ai-gateway/virtual-keys) system.
+## Overview
 
-<Note>
-Provider Slug. **`moonshot`**
-</Note>
+Moonshot allows developers and enterprises to build LLM-powered applications. This document outlines the features, supported models, and integration methods available for Moonshot through the Portkey platform.
 
-## Portkey SDK Integration with Moonshot Models
+## Quick Links
 
-Portkey provides a consistent API to interact with models from various providers. To integrate Moonshot with Portkey:
+- [Moonshot Website](https://www.moonshot.cn/)
+- [Documentation](https://platform.moonshot.cn/docs/intro#%E6%96%87%E6%9C%AC%E7%94%9F%E6%88%90%E6%A8%A1%E5%9E%8B)
 
-### 1\. Install the Portkey SDK
+## Supported Features
 
-Add the Portkey SDK to your application to interact with Moonshot's API through Portkey's gateway.
-<Tabs>
-    <Tab title="NodeJS">
-        ```
-        npm install --save portkey-ai
-        ```
-    </Tab>
-    <Tab title="Python">
+### Supported Models
 
+| Type | Models |
+|------|--------|
+| Chat Completions | moonshot-v1-8k, moonshot-v1-16k, moonshot-v1-128k |
+
+### Unsupported Features
+
+- **Prompt Playground**: Prompt playground is not supported for Moonshot models.
+
+## Integration Guide
+
+### Chat Completions Calls
+
+<CodeGroup>
+
+```Python python
+from portkey_ai import Portkey
+
+portkey = Portkey(
+    api_key="$PORTKEY_API_KEY",
+    provider="moonshot",
+    authorisation="$PROVIDER_API_KEY"
+)
+
+response = portkey.chat.completions.create(
+    model="moonshot-v1-16k",
+    messages=[
+        {"role": "system", "content": "You are a helpful assistant."},
+        {"role": "user", "content": "Tell me a joke about AI."}
+    ]
+)
 ```
-pip install portkey-ai
+
+```Node node
+import Portkey from 'portkey-ai';
+
+const portkey = new Portkey({
+    apiKey: "$PORTKEY_API_KEY",
+    provider: "moonshot",
+    authorisation: "$PROVIDER_API_KEY"
+});
+
+const response = await portkey.chat.completions.create({
+    model: "moonshot-v1-16k",
+    messages: [
+        {role: "system", content: "You are a helpful assistant."},
+        {role: "user", content: "Tell me a joke about AI."}
+    ]
+});
 ```
-    </Tab>
 
-  </Tabs>
+```bash cURL
+curl https://api.portkey.ai/v1/chat/completions \
+-H "Content-Type: application/json" \
+-H "x-portkey-api-key: $PORTKEY_API_KEY" \
+-H "x-portkey-provider: moonshot" \
+-H "Authorization: Bearer $PROVIDER_API_KEY" \
+-d '{
+  "model": "moonshot-v1-16k",
+  "messages": [
+    {"role": "system", "content": "You are a helpful assistant."},
+    {"role": "user", "content": "Tell me a joke about AI."}
+  ]
+}'
+```
 
+```Python OpenAI Python SDK
+from openai import OpenAI
+from portkey_ai import PORTKEY_GATEWAY_URL, createHeaders
 
+client = OpenAI(
+    api_key="$PROVIDER_API_KEY",
+    base_url=PORTKEY_GATEWAY_URL,
+    default_headers=createHeaders(
+        provider="moonshot",
+        api_key="$PORTKEY_API_KEY"
+    )
+)
 
-### 2\. Initialize Portkey with the Virtual Key
+response = client.chat.completions.create(
+    model="moonshot-v1-16k",
+    messages=[
+        {"role": "system", "content": "You are a helpful assistant."},
+        {"role": "user", "content": "Tell me a joke about AI."}
+    ]
+)
+```
 
-To use Moonshot with Portkey, [get your API key from here,](https://moonshot.cn) then add it to Portkey to create the virtual key.
-<Tabs>
-    <Tab title="NodeJS SDK">
-        ```
-        import Portkey from 'portkey-ai'
+```Node OpenAI Node SDK
+import OpenAI from 'openai';
+import { PORTKEY_GATEWAY_URL, createHeaders } from 'portkey-ai';
 
+const client = new OpenAI({
+    apiKey: "$PROVIDER_API_KEY",
+    baseURL: PORTKEY_GATEWAY_URL,
+    defaultHeaders: createHeaders({
+        provider: "moonshot",
+        apiKey: "$PORTKEY_API_KEY"
+    })
+});
 
-        const portkey = new Portkey({
+const response = await client.chat.completions.create({
+    model: "moonshot-v1-16k",
+    messages: [
+        {role: "system", content: "You are a helpful assistant."},
+        {role: "user", content: "Tell me a joke about AI."}
+    ]
+});
+```
 
-            apiKey: "PORTKEY_API_KEY", // defaults to process.env["PORTKEY_API_KEY"]
+</CodeGroup>
 
-            virtualKey: "VIRTUAL_KEY" // Your Moonshot Virtual Key
+### Integration via Virtual Key
 
-        })
-        ```
-    </Tab>
-    <Tab title="Python SDK">
-        ```
-        from portkey_ai import Portkey
+1. **Generate a Virtual Key**
+   Get your API key from Moonshot and add it to Portkey to create a virtual key.
 
-        portkey = Portkey(
+   You can get your Moonshot API key from the Moonshot website.
 
-            api_key="PORTKEY_API_KEY",  # Replace with your Portkey API key
+   [Insert screenshot of virtual key generation process here]
 
-            virtual_key="VIRTUAL_KEY"   # Replace with your virtual key for Groq
+2. **Using the Virtual Key**
 
-        )
-        ```
-    </Tab>
+<CodeGroup>
 
-  </Tabs>
+```Python python
+from portkey_ai import Portkey
 
+portkey = Portkey(
+    api_key="$PORTKEY_API_KEY",
+    virtual_key="$VIRTUAL_KEY"
+)
 
+response = portkey.chat.completions.create(
+    model="moonshot-v1-16k",
+    messages=[
+        {"role": "system", "content": "You are a helpful assistant."},
+        {"role": "user", "content": "Tell me a joke about AI."}
+    ]
+)
+```
 
-### 3\. Invoke Chat Completions with Moonshot
+```Node node
+import Portkey from 'portkey-ai';
 
-Use the Portkey instance to send requests to Moonshot. You can also override the virtual key directly in the API call if needed.
-<Tabs>
-    <Tab title="NodeJS SDK">
-        ```
-        const chatCompletion = await portkey.chat.completions.create({
+const portkey = new Portkey({
+    apiKey: "$PORTKEY_API_KEY",
+    virtualKey: "$VIRTUAL_KEY"
+});
 
-            messages: [{ role: 'user', content: 'Say this is a test' }],
+const response = await portkey.chat.completions.create({
+    model: "moonshot-v1-16k",
+    messages: [
+        {role: "system", content: "You are a helpful assistant."},
+        {role: "user", content: "Tell me a joke about AI."}
+    ]
+});
+```
 
-            model: 'moonshot-v1-8k',
+```bash cURL
+curl https://api.portkey.ai/v1/chat/completions \
+-H "Content-Type: application/json" \
+-H "x-portkey-api-key: $PORTKEY_API_KEY" \
+-H "x-portkey-virtual-key: $VIRTUAL_KEY" \
+-d '{
+  "model": "moonshot-v1-16k",
+  "messages": [
+    {"role": "system", "content": "You are a helpful assistant."},
+    {"role": "user", content": "Tell me a joke about AI."}
+  ]
+}'
+```
 
-        });
+```Python OpenAI Python SDK
+from openai import OpenAI
+from portkey_ai import PORTKEY_GATEWAY_URL, createHeaders
 
-        console.log(chatCompletion.choices);d
-        ```
-    </Tab>
-    <Tab title="Python SDK">
-        ```
-        completion = portkey.chat.completions.create(
+client = OpenAI(
+    api_key="",  # Not needed when using virtual key
+    base_url=PORTKEY_GATEWAY_URL,
+    default_headers=createHeaders(
+        api_key="$PORTKEY_API_KEY",
+        virtual_key="$VIRTUAL_KEY"
+    )
+)
 
-            messages= [{ "role": 'user', "content": 'Say this is a test' }],
+response = client.chat.completions.create(
+    model="moonshot-v1-16k",
+    messages=[
+        {"role": "system", "content": "You are a helpful assistant."},
+        {"role": "user", "content": "Tell me a joke about AI."}
+    ]
+)
+```
 
-            model= 'reka-core'
+```Node OpenAI Node SDK
+import OpenAI from 'openai';
+import { PORTKEY_GATEWAY_URL, createHeaders } from 'portkey-ai';
 
-        )
+const client = new OpenAI({
+    apiKey: "",  // Not needed when using virtual key
+    baseURL: PORTKEY_GATEWAY_URL,
+    defaultHeaders: createHeaders({
+        apiKey: "$PORTKEY_API_KEY",
+        virtualKey: "$VIRTUAL_KEY"
+    })
+});
 
-        print(completion)
-        ```
-    </Tab>
+const response = await client.chat.completions.create({
+    model: "moonshot-v1-16k",
+    messages: [
+        {role: "system", content: "You are a helpful assistant."},
+        {role: "user", content: "Tell me a joke about AI."}
+    ]
+});
+```
 
-  </Tabs>
+</CodeGroup>
 
+### Prompt Playground
 
-## Managing Moonshot Prompts
+Coming soon...
 
-You can manage all prompts to Moonshot in the [Prompt Library](/docs/product/prompt-library). All the current models of Moonshot are supported and you can easily start testing different prompts.
+## Explore Advanced Portkey Features
 
-Once you're ready with your prompt, you can use the `portkey.prompts.completions.create` interface to use the prompt in your application.
-
-The complete list of features supported in the SDK are available on the link below.
-<Info>
-[SDK](/docs/api-reference/portkey-sdk-client)
-</Info>
-You'll find more information in the relevant sections:
-
-1. [Add metadata to your requests](/docs/product/observability/metadata)
-2. [Add gateway configs to your Moonshot requests](/docs/product/ai-gateway/configs)
-3. [Tracing Moonshot requests](/docs/product/observability/traces)
-4. [Setup a fallback from OpenAI to Moonshot APIs](/docs/product/ai-gateway/fallbacks)
+<CardGroup cols={2}>
+  <Card title="Configure Routing" href="/docs/product/ai-gateway/routing">
+    <img src="/api/placeholder/400/320" alt="Configure Routing" />
+  </Card>
+  <Card title="Add Metadata to Requests" href="/docs/product/observability/metadata">
+    <img src="/api/placeholder/400/320" alt="Add Metadata to Requests" />
+  </Card>
+  <Card title="A/B Test Different Models" href="/docs/product/ai-gateway/load-balance">
+    <img src="/api/placeholder/400/320" alt="A/B Test Different Models" />
+  </Card>
+  <Card title="Gain Insights to Requests" href="/docs/product/observability/traces">
+    <img src="/api/placeholder/400/320" alt="Gain Insights to Requests" />
+  </Card>
+</CardGroup>
